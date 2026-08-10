@@ -1,5 +1,5 @@
 schema: skill-manifest/v1
-id: sgc-anti-wechat-ai-check
+id: lov-anti-wechat-ai-check
 version: 1.0.1
 runtime: skill-runtime/v1
 context:
