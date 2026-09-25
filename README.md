@@ -1,8 +1,12 @@
-# lov-anti-wechat-ai-check
+# 文风扫描（旧入口） · Writing Pattern Scan (Legacy)
 
-![Version](https://img.shields.io/badge/version-1.1.0-CC785C)
+![Version](https://img.shields.io/badge/version-1.1.2-CC785C)
 
-检测文章 AI 生成痕迹，输出风险评分，并可人性化润色以通过微信公众号 3.27 条款检测。
+兼容旧命令的中文表层模式扫描器。它只定位套话、过渡词和句段均匀等可观察特征，
+不判断作者身份，不预测平台审核，也不提供规避 AI 标识或检测的能力。
+
+> Deprecated：新的“去 AI 味”、作者性审计、篇章改写和复测任务请使用
+> `lov-human-writing`。本仓库只保留 `scripts/analyze.py` 的旧命令兼容。
 
 Part of [skill-publisher/skills](https://example.com/skills/skills) — by [example.com](https://example.com)
 
@@ -71,7 +75,7 @@ Claude 会自动运行分析、展示报告、提供人性化润色建议或直�
 |-------|-------|---------|
 | 0-24 | LOW | AI 特征不明显 |
 | 25-49 | MEDIUM | 有一定 AI 痕迹，建议修改 |
-| 50-100 | HIGH | AI 痕迹明显，大概率被检测 |
+| 50-100 | HIGH | 旧版表层规则命中较多，不代表 AI 概率或平台风险 |
 
 ## License
 

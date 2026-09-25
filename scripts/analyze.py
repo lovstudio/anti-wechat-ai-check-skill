@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Analyze text for AI-generated content indicators.
+Analyze text for legacy surface-pattern indicators.
 
-Checks for patterns commonly flagged by WeChat's 3.27 non-human automated
-content creation detection: template phrases, transition word density,
-sentence structure uniformity, paragraph pattern repetition, etc.
+This compatibility CLI checks template phrases, transition word density,
+sentence structure uniformity, and paragraph repetition. These uncalibrated
+heuristics do not identify authorship or predict any platform review result.
 
 Usage:
     python analyze.py --input article.md
@@ -77,6 +77,12 @@ def analyze(text: str) -> dict:
     sentences = [s.strip() for s in sentences if len(s.strip()) > 2]
 
     results = {
+        "schema": "lov-anti-wechat-ai-check/legacy-surface-scan/v1",
+        "deprecated": True,
+        "score_semantics": (
+            "Uncalibrated weighted sum of surface-pattern matches; "
+            "not an AI probability or platform-risk score."
+        ),
         "stats": {},
         "template_phrases": [],
         "structure_issues": [],
@@ -117,7 +123,7 @@ def analyze(text: str) -> dict:
     if density > 0.3:
         results["structure_issues"].append({
             "type": "transition_word_density",
-            "detail": f"过渡词密度 {density:.1%}（{len(transition_words)}/{len(sentences)} 句），AI 文章通常 >30%",
+            "detail": f"过渡词密度 {density:.1%}（{len(transition_words)}/{len(sentences)} 句），超过旧版启发式阈值 30%",
             "severity": "high",
         })
         score += 10
@@ -138,7 +144,7 @@ def analyze(text: str) -> dict:
             if cv < 0.25:
                 results["sentence_issues"].append({
                     "type": "uniform_sentence_length",
-                    "detail": f"句子长度变异系数 {cv:.2f}（<0.25 表示过于整齐，真人写作通常 >0.35）",
+                    "detail": f"句子长度变异系数 {cv:.2f}（低于旧版启发式阈值 0.25）",
                     "severity": "high",
                 })
                 score += 10
@@ -206,7 +212,7 @@ def analyze(text: str) -> dict:
         if de_ratio > 0.06:
             results["sentence_issues"].append({
                 "type": "excessive_de",
-                "detail": f"「的」字占比 {de_ratio:.1%}（共 {de_count} 个），AI 文章常 >6%",
+                "detail": f"「的」字占比 {de_ratio:.1%}（共 {de_count} 个），超过旧版启发式阈值 6%",
                 "severity": "medium",
             })
             score += 5
@@ -216,7 +222,7 @@ def analyze(text: str) -> dict:
     if len(enum_matches) > 6:
         results["structure_issues"].append({
             "type": "excessive_enumeration",
-            "detail": f"列举标记 {len(enum_matches)} 处，过度条理化是 AI 特征",
+            "detail": f"列举标记 {len(enum_matches)} 处，超过旧版启发式阈值 6 处",
             "severity": "low",
         })
         score += 3
@@ -235,9 +241,10 @@ def analyze(text: str) -> dict:
 
 def format_report(r: dict) -> str:
     out = []
-    out.append(f"═══ AI 痕迹分析报告 ═══\n")
+    out.append("═══ 旧版表层模式扫描报告（已弃用）═══\n")
+    out.append("说明: 分数是未校准的表层匹配加权和，不是 AI 概率或平台风险。")
     out.append(f"字数: {r['stats']['char_count']}  段落: {r['stats']['paragraph_count']}  句子: {r['stats']['sentence_count']}")
-    out.append(f"风险评分: {r['risk_score']}/100  等级: {r['risk_level']}\n")
+    out.append(f"兼容分数: {r['risk_score']}/100  档位: {r['risk_level']}\n")
 
     if r["template_phrases"]:
         out.append(f"── 模板短语 ({len(r['template_phrases'])} 处) ──")
@@ -255,7 +262,9 @@ def format_report(r: dict) -> str:
             out.append("")
 
     if r["risk_score"] < 10:
-        out.append("✅ 文本 AI 特征不明显，风险较低。")
+        out.append("旧版表层规则命中较少；这不能证明作者身份或平台审核结果。")
+
+    out.append("建议: 新任务改用 lov-human-writing，先审作者性与篇章结构，再做表层复测。")
 
     return "\n".join(out)
 
